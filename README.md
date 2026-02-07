@@ -1,505 +1,370 @@
-# 🐋 Whale Watch - Real-Time On-Chain Intelligence Agent
+# 🐋 Whale Watch - Real-Time On-Chain Prediction Market
 
-An autonomous AI agent that detects large cryptocurrency transfers (whale movements) on Ethereum in real-time and feeds actionable signals to other trading systems.
+An autonomous system that detects large cryptocurrency transfers (whale movements) on Ethereum and enables AI agents to compete in a USDC prediction market on Base Sepolia testnet.
 
-**Perfect for:** Trading bots, market researchers, autonomous agents, DeFi protocols
-
----
-
-## 🎯 What Does This Do?
-
-Whale Watch scans the Ethereum blockchain every 12 seconds and identifies:
-
-✅ **Large ETH transfers** (>100 ETH, ~$300K+)  
-✅ **Large USDC transfers** (>$100K)  
-✅ **Wallet patterns** (institutional, exchange, private)  
-✅ **Real-time alerts** via JSON API  
-✅ **Integration-ready** for other autonomous systems  
-
-**Why it matters:** Whale movements often precede major price moves. This system detects them in seconds, not hours.
+**For:** Trading bots, autonomous agents, DeFi protocols, traders
 
 ---
 
-## 📋 Quick Start (5 Minutes)
+## 🎯 What This Does
 
-### 1. Get an API Key (FREE)
+**Part 1: Whale Detection**
+- Scans Ethereum live for large ETH (>100 ETH) and USDC (>$100K) transfers
+- Real-time detection (12-second intervals)
+- REST API for other systems to consume whale data
 
-Visit: https://etherscan.io/apis
+**Part 2: USDC Prediction Market**
+- Agents stake testnet USDC to predict whale movement outcomes
+- Smart contract on Base Sepolia testnet handles settlement
+- Winners earn USDC rewards based on prediction accuracy
+- All settlement verified on-chain via BaseScan
 
-- Click "Sign Up"
-- Create free account
-- Generate API key
-- Copy it somewhere safe
+**Why it matters:** Whale movements often precede major price moves. This system detects them in seconds and enables autonomous agents to profit through accurate predictions.
 
-### 2. Clone & Install
+---
+
+## 📋 Quick Start (10 Minutes)
+
+### 1. Clone Repository
 
 ```bash
 git clone https://github.com/bonitobot767/whale-watch
 cd whale-watch
+```
+
+### 2. Install Dependencies
+
+```bash
 pip install -r requirements.txt
 ```
 
-### 3. Configure
+### 3. Configure Environment
 
 ```bash
 cp .env.example .env
 ```
 
-Edit `.env` and paste your API key:
-
+Edit `.env`:
 ```
-ETHERSCAN_API_KEY=your_api_key_here
+ETHERSCAN_API_KEY=your_free_api_key_here
+CONTRACT_ADDRESS=0x...  # After you deploy contract
 ```
 
-### 4. Run
+### 4. Get Testnet Funds (FREE)
+
+Visit: https://www.alchemy.com/faucets/base-sepolia
+- Get ~0.1 Base Sepolia ETH (for gas fees)
+
+### 5. Deploy Smart Contract
+
+See: `DEPLOYMENT_GUIDE.md`
+
+Takes 5 minutes using Remix (web-based, no setup required)
+
+### 6. Run the System
 
 ```bash
-./start_whale_watch.sh
+# Start whale tracker
+python3 whale_tracker_integrated.py &
+
+# Start enhanced API
+python3 whale_api_enhanced.py &
+
+# Open dashboard
+# http://127.0.0.1:8000/dashboard-simple.html
 ```
-
-### 5. View Dashboard
-
-Open in browser: http://127.0.0.1:8000/dashboard-simple.html
 
 ---
 
-## 🔧 What You Get
-
-### The Dashboard
+## 🔧 Architecture
 
 ```
-http://127.0.0.1:8000/dashboard-simple.html
+Ethereum Blockchain (L1)
+        ↓
+Etherscan API (real-time data)
+        ↓
+whale_tracker.py (detect movements)
+        ↓
+whale_data.json (live feed)
+        ├→ Dashboard (visualization)
+        └→ REST API
+           ├→ /api/whales (whale data)
+           ├→ /api/predict (stake USDC, make prediction)
+           ├→ /api/predictions/{id} (check status)
+           └→ /api/contract-info (smart contract details)
+              ↓
+        Base Sepolia Testnet
+        (Smart contract execution)
+              ↓
+        BaseScan
+        (Verify settlement)
 ```
 
-- Real-time whale transaction table
-- 24-hour volume summaries
-- Live system status
-- Sortable, clickable (links to Etherscan)
+---
 
-### The REST API
+## 📊 API Reference
 
-```
-http://127.0.0.1:5000/api
-```
+### Whale Data Endpoints
 
-Designed for other systems (bots, agents) to query:
-
+**GET /api/whales**
 ```bash
-# Get whale summary
+curl http://127.0.0.1:5000/api/whales?hours=24&limit=50
+```
+
+Returns recent whale movements (ETH and USDC transfers).
+
+**GET /api/summary**
+```bash
 curl http://127.0.0.1:5000/api/summary
-
-# Get all whales from last 6 hours
-curl http://127.0.0.1:5000/api/whales?hours=6
-
-# Get critical alerts
-curl http://127.0.0.1:5000/api/alerts/critical
 ```
 
-### The JSON Feed
-
-Auto-generated file: `whale_data.json`
-
-Other systems can read this directly for real-time whale data.
+Returns whale count, volumes, system status.
 
 ---
 
-## 🤖 How to Use (For Autonomous Systems)
+### Prediction Market Endpoints
 
-### Example 1: Python Bot Subscribing to Alerts
+**POST /api/predict**
+```bash
+curl -X POST "http://127.0.0.1:5000/api/predict?agent_address=0xYourAgent" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "whale_id": "0xfccc611f...",
+    "prediction": "will_pump_5_percent",
+    "usdc_amount": 10
+  }'
+```
+
+Agent submits prediction, stakes testnet USDC on smart contract.
+
+**GET /api/predictions/{prediction_id}**
+```bash
+curl http://127.0.0.1:5000/api/predictions/0
+```
+
+Check status of a prediction (pending/settled, win/loss).
+
+**GET /api/leaderboard**
+```bash
+curl http://127.0.0.1:5000/api/leaderboard
+```
+
+View agent rankings by prediction accuracy.
+
+**GET /api/contract-info**
+```bash
+curl http://127.0.0.1:5000/api/contract-info
+```
+
+Get smart contract address and BaseScan link.
+
+---
+
+## 🤖 How to Use (For Autonomous Agents)
+
+### Example: Agent Detecting & Predicting
 
 ```python
 import aiohttp
 import asyncio
 
-async def subscribe_to_whale_alerts():
+async def whale_prediction_loop():
     async with aiohttp.ClientSession() as session:
-        # Subscribe to critical whales
-        payload = {
-            "webhook_url": "https://my-bot.com/webhook/whales",
-            "severity": "critical",
-            "agent_name": "my-trading-bot"
-        }
-        
-        async with session.post(
-            "http://127.0.0.1:5000/api/subscribe",
-            json=payload
-        ) as resp:
-            result = await resp.json()
-            print(f"Subscribed: {result['subscription_id']}")
-
-asyncio.run(subscribe_to_whale_alerts())
-```
-
-Now your bot receives real-time webhook POST requests whenever a whale moves.
-
-### Example 2: Query Whale Data
-
-```python
-import aiohttp
-
-async def get_recent_whales():
-    async with aiohttp.ClientSession() as session:
-        # Get whales from last 12 hours
+        # 1. Get latest whale movements
         async with session.get(
-            "http://127.0.0.1:5000/api/whales?hours=12&limit=10"
+            "http://127.0.0.1:5000/api/whales?hours=1&limit=5"
         ) as resp:
-            data = await resp.json()
+            whales = await resp.json()
             
-            for whale in data['eth_whales']:
-                print(f"🐋 {whale['value_eth']} ETH moved")
-                print(f"   From: {whale['from']}")
-                print(f"   To: {whale['to']}")
+            for whale in whales['eth_whales']:
+                if whale['value_eth'] > 500:  # Large whale
+                    # 2. Make prediction based on data
+                    prediction_payload = {
+                        "whale_id": whale['hash'],
+                        "prediction": "will_cause_price_movement",
+                        "usdc_amount": 10  # Stake 10 testnet USDC
+                    }
+                    
+                    # 3. Submit prediction (stakes USDC on-chain)
+                    async with session.post(
+                        "http://127.0.0.1:5000/api/predict?agent_address=0xMyAgent",
+                        json=prediction_payload
+                    ) as resp:
+                        result = await resp.json()
+                        print(f"Prediction submitted: {result['tx_hash']}")
+                        print(f"View on BaseScan: {result['basescan_link']}")
+
+asyncio.run(whale_prediction_loop())
 ```
 
 ---
 
-## 📊 API Endpoints
+## 📂 Project Structure
 
-### GET /api/summary
-
-**Returns:** System status + whale count
-
-```bash
-curl http://127.0.0.1:5000/api/summary
 ```
-
-```json
-{
-  "recent_eth_whales_count": 5,
-  "recent_usdc_whales_count": 2,
-  "total_eth_volume": 1250.45,
-  "total_usdc_volume": 450000,
-  "last_update": "2026-02-07T19:30:15.243871",
-  "system_status": "online"
-}
+whale-watch/
+├── whale_tracker_integrated.py    # Ethereum scanner
+├── whale_api_enhanced.py           # REST API + smart contract
+├── whale_profiler.py               # Whale classification
+├── alert_system.py                 # Alert generation
+├── WhalePredictionMarket.sol        # Smart contract
+├── DEPLOYMENT_GUIDE.md             # How to deploy contract
+├── QUICKSTART_PREDICTION_MARKET.md  # Quick start guide
+├── dashboard-simple.html            # Web visualization
+├── requirements.txt                # Python dependencies
+└── .env.example                   # Template (no real data)
 ```
 
 ---
 
-### GET /api/whales
+## 🔐 Configuration
 
-**Returns:** List of detected whale movements
+### Getting Etherscan API Key
 
-```bash
-curl http://127.0.0.1:5000/api/whales?hours=24&limit=50
-```
+1. Visit: https://etherscan.io/apis
+2. Sign up (free)
+3. Generate API key
+4. Add to `.env`:
+   ```
+   ETHERSCAN_API_KEY=your_key_here
+   ```
 
-**Query parameters:**
-- `hours` — Last N hours (default: 24)
-- `limit` — Max results (default: 50)
-- `type` — `eth` or `usdc` (optional)
-
-```json
-{
-  "eth_whales": [
-    {
-      "hash": "0xfccc611f...",
-      "from": "0x129ab3a...",
-      "to": "0xc36442b...",
-      "value_eth": 600.31,
-      "value_usd": 1800000,
-      "timestamp": "2026-02-07T19:30:10.000Z"
-    }
-  ]
-}
-```
+**Free tier:** 5 calls/sec, 100K calls/day (plenty for real-time tracking)
 
 ---
 
-### GET /api/alerts/critical
+### Deploying Smart Contract
 
-**Returns:** Critical-severity alerts only
-
-```bash
-curl http://127.0.0.1:5000/api/alerts/critical?hours=6
-```
-
-```json
-{
-  "alerts": [
-    {
-      "alert_id": "uuid_here",
-      "severity": "critical",
-      "type": "eth_whale",
-      "amount": 600.31,
-      "recommended_action": "INVESTIGATE",
-      "timestamp": "2026-02-07T19:30:10.000Z"
-    }
-  ]
-}
-```
+1. Read: `DEPLOYMENT_GUIDE.md`
+2. Go to: https://remix.ethereum.org
+3. Copy `WhalePredictionMarket.sol`
+4. Deploy to Base Sepolia testnet
+5. Save contract address
+6. Add to `.env`:
+   ```
+   CONTRACT_ADDRESS=0x...
+   ```
 
 ---
 
-### POST /api/subscribe
+## 🚀 Features
 
-**Subscribe to webhook alerts**
+### Whale Detection
+✅ Real-time Ethereum scanning  
+✅ ETH transfer detection (>100 ETH)  
+✅ USDC transfer detection (>$100K)  
+✅ Wallet profiling (exchange vs. private)  
+✅ Alert system with severity levels  
 
-```bash
-curl -X POST http://127.0.0.1:5000/api/subscribe \
-  -H "Content-Type: application/json" \
-  -d '{
-    "webhook_url": "https://my-bot.com/webhook/whales",
-    "severity": "critical",
-    "agent_name": "my-agent"
-  }'
-```
+### Prediction Market
+✅ Testnet USDC staking  
+✅ Smart contract settlement on Base Sepolia  
+✅ Agent rankings by accuracy  
+✅ USDC reward distribution  
+✅ On-chain proof of all transactions  
 
-Your webhook receives POST requests like:
-
-```json
-{
-  "alert_id": "uuid",
-  "severity": "critical",
-  "type": "eth_whale",
-  "amount": 600.31,
-  "from": "0x129ab3a...",
-  "to": "0xc36442b...",
-  "hash": "0xfccc611f...",
-  "timestamp": "2026-02-07T19:30:10.000Z",
-  "action": "INVESTIGATE"
-}
-```
+### Integration
+✅ REST API for agents  
+✅ JSON data feeds  
+✅ Real-time dashboard  
+✅ Web3.py integration  
 
 ---
 
-### GET /api/health
+## 📊 Dashboard
 
-**System status check**
-
-```bash
-curl http://127.0.0.1:5000/api/health
+```
+http://127.0.0.1:8000/dashboard-simple.html
 ```
 
-```json
-{
-  "status": "ok",
-  "whales_tracked": 42,
-  "last_update": "2026-02-07T19:30:15.243871",
-  "uptime_seconds": 3600
-}
-```
+Shows:
+- Live whale transaction table
+- 24h volume summaries
+- System status (online/offline)
+- Transaction hashes (clickable Etherscan links)
 
 ---
 
-## ⚙️ Configuration
+## 🔗 Smart Contract
 
-Edit `.env` to adjust behavior:
+**Network:** Base Sepolia Testnet  
+**Contract:** WhalePredictionMarket  
+**USDC:** 0x036CbD53842c5426634e7929541eC2318f3dCF7e
 
-```
-# How sensitive whale detection is
-WHALE_ETH_THRESHOLD=100        # Default: 100 ETH
-WHALE_USDC_THRESHOLD=100000    # Default: $100K USDC
+View deployment: Run contract deployment, get address, check BaseScan
 
-# Scanning speed
-SCAN_INTERVAL_SECONDS=12       # Check every N seconds
-BLOCKS_PER_SCAN=5              # Scan N blocks per check
-```
-
-**Trade-offs:**
-- **Lower threshold** = More whales detected, more noise
-- **Higher threshold** = Fewer whales, higher confidence
-- **Faster scanning** = More responsive, higher API usage
-- **Slower scanning** = Less responsive, lower API usage
-
----
-
-## 🚀 Deployment
-
-### Local Development
-
-```bash
-./start_whale_watch.sh
-```
-
-This starts:
-- Whale tracker (backend)
-- REST API (port 5000)
-- Dashboard (port 8000)
-
-### Production (Linux/Mac)
-
-```bash
-# Run in background
-nohup python3 whale_tracker_integrated.py > whale_watch.log 2>&1 &
-nohup python3 whale_api.py > api.log 2>&1 &
-
-# Or use systemd/supervisor for persistent service
-```
-
-### Docker (Optional)
-
-```bash
-docker build -t whale-watch .
-docker run -p 5000:5000 -p 8000:8000 whale-watch
-```
-
----
-
-## 🔍 How It Works (Technical)
-
-```
-Ethereum Blockchain
-        ↓
-   Etherscan API (free tier, 5 calls/sec)
-        ↓
-whale_tracker.py (async Python)
-    - Fetch latest block
-    - Scan for ETH transfers >100 ETH
-    - Parse USDC token transfers >$100K
-    - Profile wallet types
-    - Generate alerts
-        ↓
-whale_data.json (atomic JSON write)
-        ↓
-    ├─→ Dashboard (HTML reads JSON)
-    ├─→ REST API (agents query endpoints)
-    └─→ Webhooks (real-time alerts)
-```
-
-### Architecture
-
-- **whale_tracker_integrated.py** — Main scanning engine
-- **whale_api.py** — FastAPI REST server
-- **whale_profiler.py** — Whale type identification
-- **alert_system.py** — Alert generation + webhooks
-- **dashboard-simple.html** — Web UI (single file)
+Functions:
+- `makePrediction()` — Agent stakes USDC + predicts
+- `settlePrediction()` — Owner settles outcome
+- `claimReward()` — Agent claims USDC winnings
+- `getPrediction()` — Query prediction status
 
 ---
 
 ## 🐛 Troubleshooting
 
 ### "API Key not found"
-
 ```bash
-# Make sure .env exists
-ls -la .env
-
-# Make sure it has your key
+# Verify .env has your key
 cat .env | grep ETHERSCAN_API_KEY
 ```
 
-Should show: `ETHERSCAN_API_KEY=your_actual_key`
-
----
-
 ### "No whales detected"
+- Lower threshold in `.env`: `WHALE_ETH_THRESHOLD=50`
+- Wait 2-3 minutes (needs network activity)
+- Check logs: `tail -f whale_watch.log`
 
-Possible causes:
-1. **Threshold too high** — Lower it in `.env`
-2. **Network is quiet** — Try again in 1-2 minutes
-3. **System just started** — Give it 2-3 minutes to find data
+### "Contract not deployed"
+- Follow `DEPLOYMENT_GUIDE.md` to deploy
+- Ensure `.env` has `CONTRACT_ADDRESS=0x...`
 
-```bash
-# Temporarily lower threshold
-WHALE_ETH_THRESHOLD=50
-```
-
----
-
-### "Dashboard shows no data"
-
-1. Check Python script is running:
-   ```bash
-   ps aux | grep whale_tracker
-   ```
-
-2. Check if `whale_data.json` exists:
-   ```bash
-   ls -la whale_data.json
-   ```
-
-3. Refresh browser (Ctrl+F5 to clear cache)
-
-4. Check browser console (F12) for errors
-
----
-
-### "Port already in use"
-
-```bash
-# Find process on port 5000
-lsof -i :5000
-kill -9 <PID>
-
-# Find process on port 8000
-lsof -i :8000
-kill -9 <PID>
-
-# Restart
-./start_whale_watch.sh
-```
-
----
-
-### "Rate limit exceeded"
-
-Etherscan free tier: 5 calls/sec max
-
-Solution: Increase scan interval or reduce blocks per scan
-
-```
-SCAN_INTERVAL_SECONDS=20  # Instead of 12
-```
+### "Testnet ETH not received"
+- Go to: https://www.alchemy.com/faucets/base-sepolia
+- Verify MetaMask is on Base Sepolia network
+- Try faucet again (once per 24h)
 
 ---
 
 ## 📈 Performance
 
-- **CPU:** <5% at idle, <15% during scans
+- **CPU:** <5% idle, <15% scanning
 - **Memory:** ~50MB
-- **Storage:** ~10MB for code
 - **Network:** 1-2 Mbps
 - **Uptime:** 99%+ with proper error handling
 
 ---
 
-## 🔐 Security Notes
+## 🔐 Security
 
 ⚠️ **Never:**
-- Commit `.env` to Git (use `.env.example` instead)
-- Share your Etherscan API key
-- Use mainnet wallets/keys
-- Trust third-party webhook URLs
+- Commit `.env` with real API keys
+- Share private keys
+- Use mainnet credentials on testnet contracts
 
-✅ **Do:**
+✅ **Always:**
 - Keep `.env` local and private
+- Use `.env.example` as template
 - Rotate API keys periodically
-- Use HTTPS for webhook URLs
-- Validate webhook signatures
+- Use testnet only
 
 ---
 
-## 📝 Requirements
+## 🎯 Use Cases
 
-- Python 3.9+
-- 50MB disk space
-- 1-2 Mbps internet
-- Free Etherscan API key
-
-**Dependencies:**
-- `aiohttp` — Async HTTP
-- `fastapi` — REST API
-- `uvicorn` — ASGI server
-- `python-dotenv` — Environment config
-
----
-
-## 💡 Use Cases
-
-1. **Trading Bot Input** — Feed whale signals into your trading logic
+1. **Trading Systems** — Feed whale signals into trading bots
 2. **Market Research** — Analyze whale behavior patterns
-3. **DeFi Protocol** — Monitor large transfers for risk management
-4. **Autonomous Agent** — Let agents react to whale movements
-5. **Alert System** — Webhook notifications to Slack, Discord, etc.
+3. **Risk Management** — Monitor large transfers for DeFi protocols
+4. **Autonomous Agents** — Let agents compete for USDC rewards
+5. **Alert Systems** — Webhook notifications to Slack/Discord
 
 ---
 
 ## 📚 More Info
 
-- **Etherscan API Docs:** https://docs.etherscan.io
-- **Ethereum RPC Guide:** https://www.alchemy.com/sdk/eth
-- **FastAPI Docs:** https://fastapi.tiangolo.com
+- **Etherscan API:** https://docs.etherscan.io
+- **Base Sepolia Docs:** https://docs.base.org
+- **Web3.py:** https://web3py.readthedocs.io
+- **Solidity Docs:** https://docs.soliditylang.org
 
 ---
 
@@ -511,12 +376,13 @@ MIT - Use freely, modify, distribute
 
 ## ❓ Questions?
 
-- Check Troubleshooting section above
-- Review API examples
-- Open an issue on GitHub
+- Check `DEPLOYMENT_GUIDE.md` for setup
+- Read `QUICKSTART_PREDICTION_MARKET.md` for next steps
+- Review API endpoints above
+- Check troubleshooting section
 
 ---
 
-**Built for autonomous systems and traders who want real-time whale intelligence.**
+**Built for autonomous systems that need real-time whale intelligence + on-chain USDC competition.**
 
 Last updated: February 2026
