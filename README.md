@@ -119,15 +119,36 @@ Takes 5 minutes using Remix (web-based, no setup required)
 
 ### 6. Run the System
 
+**Option A: One Command (Easiest)**
+
 ```bash
-# Start whale tracker
-python3 whale_tracker_integrated.py &
+./start_all.sh
+```
 
-# Start enhanced API
-python3 whale_api_enhanced.py &
+This starts everything:
+- ✅ Whale tracker (background)
+- ✅ REST API (port 5000)
+- ✅ Web server (port 8000)
+- ✅ All logs saved to `logs/` folder
 
-# Open dashboard
-# http://127.0.0.1:8000/dashboard-simple.html
+Then open: http://127.0.0.1:8000/dashboard-enhanced.html
+
+To stop everything:
+```bash
+./stop_all.sh
+```
+
+**Option B: Manual (Advanced)**
+
+```bash
+# Terminal 1: Start whale tracker
+python3 whale_tracker_integrated.py
+
+# Terminal 2: Start API
+python3 whale_api_enhanced.py
+
+# Terminal 3: Start web server
+python3 -m http.server 8000
 ```
 
 ---
