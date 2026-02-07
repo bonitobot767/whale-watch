@@ -33,7 +33,7 @@
 - [ ] **Check API Key**
   ```bash
   cat .env | grep ETHERSCAN_API_KEY
-  # Should show: ETHERSCAN_API_KEY=69R9JPVEXAUITF3I98RP4PZZT28PW1SNJ9
+  # Should show: ETHERSCAN_API_KEY=your_key_here
   ```
 
 - [ ] **Verify Files Exist**

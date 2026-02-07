@@ -16,7 +16,7 @@
 
 - **.env** (hidden file)
   - API key configuration
-  - ETHERSCAN_API_KEY=69R9JPVEXAUITF3I98RP4PZZT28PW1SNJ9
+  - ETHERSCAN_API_KEY=your_key_here
 
 - **requirements.txt**
   - Python dependencies (aiohttp, python-dotenv)
