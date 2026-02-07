@@ -1,0 +1,21 @@
+# On-Chain Intelligence Agent
+# Real-time whale tracking, pattern detection, and price correlation
+# Track: Agentic Commerce - USDC Hackathon 2026
+
+# HTTP requests
+aiohttp>=3.9.0
+requests>=2.31.0
+
+# Async support
+asyncio>=3.4.3
+
+# Web dashboard & API
+aiohttp>=3.9.0
+aiohttp-cors>=0.7.0
+flask>=3.0.0
+
+# JSON handling
+python-dateutil>=2.8.2
+
+# Logging
+python-json-logger>=2.0.7

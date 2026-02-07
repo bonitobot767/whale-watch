@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐋 Whale Watch - Live Tracker</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0f1115;
+            color: #fff;
+            padding: 20px;
+        }
+        
+        .container { max-width: 1400px; margin: 0 auto; }
+        
+        header {
+            background: #181b21;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #2d3342;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        
+        .status {
+            font-size: 0.9rem;
+            padding: 8px 16px;
+            border-radius: 50px;
+            background: #10b981;
+            color: #000;
+            font-weight: 600;
+        }
+        
+        .status.offline {
+            background: #6b7280;
+            color: #fff;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: #181b21;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid #2d3342;
+        }
+        
+        .stat-label {
+            color: #9ca3af;
+            font-size: 0.8rem;
+            margin-bottom: 8px;
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #3b82f6;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #2d3342;
+        }
+        
+        .tab-btn {
+            background: none;
+            border: none;
+            color: #9ca3af;
+            padding: 12px 20px;
+            cursor: pointer;
+            font-weight: 600;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab-btn.active {
+            color: #3b82f6;
+            border-bottom-color: #3b82f6;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .section {
+            background: #181b21;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #2d3342;
+            margin-bottom: 20px;
+        }
+        
+        .section h2 {
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+        
+        .alert-item {
+            background: #0f1115;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #ef4444;
+        }
+        
+        .alert-item.critical {
+            border-left-color: #dc2626;
+            background: rgba(220, 38, 38, 0.1);
+        }
+        
+        .alert-item.high {
+            border-left-color: #f59e0b;
+            background: rgba(245, 158, 11, 0.1);
+        }
+        
+        .alert-severity {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-right: 10px;
+        }
+        
+        .alert-severity.critical {
+            background: #dc2626;
+            color: #fff;
+        }
+        
+        .alert-severity.high {
+            background: #f59e0b;
+            color: #000;
+        }
+        
+        .whale-item {
+            background: #0f1115;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #10b981;
+        }
+        
+        .whale-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #10b981;
+            margin-bottom: 8px;
+        }
+        
+        .whale-profile {
+            background: #181b21;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+            display: inline-block;
+        }
+        
+        .whale-profile.exchange {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+        }
+        
+        .whale-profile.private {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+        
+        .whale-profile.contract {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+        }
+        
+        .whale-details {
+            font-size: 0.85rem;
+            color: #9ca3af;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .hash-link {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+        
+        .hash-link:hover {
+            text-decoration: underline;
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6b7280;
+        }
+        
+        .update-time {
+            font-size: 0.85rem;
+            color: #9ca3af;
+            margin-top: 15px;
+            text-align: right;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .loading {
+            animation: pulse 1.5s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">🐋 Whale Watch - INTEGRATED</div>
+            <div class="status" id="status">Checking...</div>
+        </header>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-label">ETH Whales</div>
+                <div class="stat-value" id="ethCount">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">USDC Whales</div>
+                <div class="stat-value" id="usdcCount">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">🚨 Alerts</div>
+                <div class="stat-value" id="alertCount">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Last Update</div>
+                <div class="stat-value" id="updateTime" style="font-size: 0.9rem;">--:--</div>
+            </div>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('alerts')">🚨 Alerts</button>
+            <button class="tab-btn" onclick="switchTab('whales')">🐋 Whales</button>
+            <button class="tab-btn" onclick="switchTab('profiles')">👁️ Profiles</button>
+        </div>
+        
+        <!-- Alerts Tab -->
+        <div id="alerts" class="tab-content active">
+            <div class="section">
+                <h2>⚠️ Recent Alerts</h2>
+                <div id="alertsContainer" class="loading">Loading alerts...</div>
+                <div class="update-time">Critical and high-severity whale movements</div>
+            </div>
+        </div>
+        
+        <!-- Whales Tab -->
+        <div id="whales" class="tab-content">
+            <div class="section">
+                <h2>🐋 ETH Whale Movements</h2>
+                <div id="ethWhalesContainer" class="loading">Loading ETH whales...</div>
+            </div>
+            <div class="section">
+                <h2>💵 USDC Whale Movements</h2>
+                <div id="usdcWhalesContainer" class="loading">Loading USDC whales...</div>
+            </div>
+        </div>
+        
+        <!-- Profiles Tab -->
+        <div id="profiles" class="tab-content">
+            <div class="section">
+                <h2>👁️ Whale Profiles (Intelligence)</h2>
+                <div id="profilesContainer" class="loading">Loading whale profiles...</div>
+                <div class="update-time">Whale identification & classification</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const DATA_FILE = 'whale_data.json';
+        
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+        
+        async function updateDashboard() {
+            try {
+                const response = await fetch(DATA_FILE + '?t=' + Date.now());
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                const data = await response.json();
+                
+                // Update status
+                document.getElementById('status').textContent = '🟢 LIVE';
+                document.getElementById('status').classList.remove('offline');
+                
+                // Update stats
+                document.getElementById('ethCount').textContent = data.eth_whales?.length || 0;
+                document.getElementById('usdcCount').textContent = data.usdc_whales?.length || 0;
+                document.getElementById('alertCount').textContent = data.summary?.total_alerts || 0;
+                
+                const time = new Date(data.last_updated).toLocaleTimeString('en-US');
+                document.getElementById('updateTime').textContent = time;
+                
+                // Display Alerts (NEWEST FIRST)
+                const alertsContainer = document.getElementById('alertsContainer');
+                alertsContainer.classList.remove('loading');
+                let alertsHTML = '';
+                
+                if (data.alerts && data.alerts.length > 0) {
+                    // Reverse to show newest first
+                    [...data.alerts].reverse().slice(0, 20).forEach(alert => {
+                        alertsHTML += `
+                            <div class="alert-item ${alert.severity}">
+                                <div style="margin-bottom: 8px;">
+                                    <span class="alert-severity ${alert.severity}">${alert.severity.toUpperCase()}</span>
+                                    <span style="color: #9ca3af;">${alert.whale_type}</span>
+                                </div>
+                                <div style="font-weight: 600; margin-bottom: 5px;">${alert.message}</div>
+                                <div class="whale-details">
+                                    <a href="https://etherscan.io/tx/${alert.tx_hash}" class="hash-link" target="_blank">
+                                        ${alert.tx_hash.substring(0, 20)}...
+                                    </a>
+                                    • ${new Date(alert.timestamp).toLocaleTimeString()}
+                                </div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    alertsHTML = '<div class="no-data">No alerts yet (monitoring...)</div>';
+                }
+                alertsContainer.innerHTML = alertsHTML || '<div class="no-data">No alerts</div>';
+                
+                // Display Whales
+                let ethHTML = '';
+                if (data.eth_whales && data.eth_whales.length > 0) {
+                    data.eth_whales.slice(0, 10).forEach(whale => {
+                        const profile = whale.whale_profile || {};
+                        ethHTML += `
+                            <div class="whale-item">
+                                <div class="whale-value">${whale.value_eth.toFixed(2)} ETH</div>
+                                <div class="whale-profile ${profile.whale_type}">
+                                    ${profile.whale_type || 'unknown'} (${(profile.confidence * 100).toFixed(0)}%)
+                                </div>
+                                <div class="whale-details">
+                                    From: ${whale.from}<br>
+                                    To: ${whale.to || 'contract'}<br>
+                                    <a href="https://etherscan.io/tx/${whale.hash}" class="hash-link" target="_blank">
+                                        ${whale.hash.substring(0, 20)}...
+                                    </a>
+                                </div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    ethHTML = '<div class="no-data">No ETH whales detected yet</div>';
+                }
+                document.getElementById('ethWhalesContainer').innerHTML = ethHTML;
+                
+                let usdcHTML = '';
+                if (data.usdc_whales && data.usdc_whales.length > 0) {
+                    data.usdc_whales.slice(0, 10).forEach(whale => {
+                        const profile = whale.whale_profile || {};
+                        usdcHTML += `
+                            <div class="whale-item">
+                                <div class="whale-value">$${whale.value_usdc.toLocaleString()}</div>
+                                <div class="whale-profile ${profile.whale_type}">
+                                    ${profile.whale_type || 'unknown'} (${(profile.confidence * 100).toFixed(0)}%)
+                                </div>
+                                <div class="whale-details">
+                                    To: ${whale.to}<br>
+                                    <a href="https://etherscan.io/tx/${whale.hash}" class="hash-link" target="_blank">
+                                        ${whale.hash.substring(0, 20)}...
+                                    </a>
+                                </div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    usdcHTML = '<div class="no-data">No USDC whales detected yet</div>';
+                }
+                document.getElementById('usdcWhalesContainer').innerHTML = usdcHTML;
+                
+                // Display Profiles
+                const profilesContainer = document.getElementById('profilesContainer');
+                profilesContainer.classList.remove('loading');
+                
+                let allWhales = [...(data.eth_whales || []), ...(data.usdc_whales || [])];
+                let profilesHTML = '';
+                
+                if (allWhales.length > 0) {
+                    const uniqueProfiles = {};
+                    allWhales.forEach(whale => {
+                        const profile = whale.whale_profile || {};
+                        const addr = profile.address || 'unknown';
+                        if (!uniqueProfiles[addr]) {
+                            uniqueProfiles[addr] = profile;
+                        }
+                    });
+                    
+                    Object.values(uniqueProfiles).slice(0, 15).forEach(profile => {
+                        profilesHTML += `
+                            <div class="whale-item">
+                                <div style="font-weight: 600; color: #3b82f6; margin-bottom: 8px;">
+                                    ${profile.whale_type.toUpperCase()}
+                                </div>
+                                <div class="whale-profile ${profile.whale_type}">
+                                    Confidence: ${(profile.confidence * 100).toFixed(0)}%
+                                </div>
+                                <div class="whale-details">
+                                    Address: ${profile.address.substring(0, 20)}...<br>
+                                    ${profile.description}
+                                </div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    profilesHTML = '<div class="no-data">No whale profiles yet</div>';
+                }
+                profilesContainer.innerHTML = profilesHTML || '<div class="no-data">No profiles</div>';
+                
+            } catch (error) {
+                document.getElementById('status').textContent = '🔴 OFFLINE';
+                document.getElementById('status').classList.add('offline');
+                console.error('Dashboard error:', error);
+            }
+        }
+        
+        // Load immediately
+        updateDashboard();
+        
+        // Refresh every 5 seconds
+        setInterval(updateDashboard, 5000);
+    </script>
+</body>
+</html>
