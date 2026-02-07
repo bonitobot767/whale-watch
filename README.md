@@ -6,6 +6,62 @@ An autonomous system that detects large cryptocurrency transfers (whale movement
 
 ---
 
+## ⚠️ DISCLAIMER & LIABILITY - MUST READ
+
+**THIS SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY**
+
+### Critical Warnings
+
+**TESTNET ONLY DEPLOYMENT**
+- This system is designed for Base Sepolia TESTNET only
+- Testnet uses fake money (no real value)
+- Gas fees on testnet are free/minimal
+
+**IF DEPLOYED TO MAINNET (Ethereum, Polygon, etc.):**
+- ❌ Real money will be at stake
+- ❌ Gas fees cost real ETH
+- ❌ Smart contract bugs = financial loss
+- ❌ No recourse or recovery possible
+- ❌ This is extremely risky
+
+**No Warranty. No Liability. User Assumes All Risk.**
+
+The author (Bonito) is NOT responsible for:
+- Smart contract vulnerabilities
+- Financial losses from any deployment
+- Data breaches or security issues
+- API rate limit failures
+- Incorrect predictions or market outcomes
+- Any damages whatsoever from using this code
+
+### Your Full Responsibility
+
+You accept ALL risks by using this software:
+
+1. **Deployment:** You choose the network (testnet = safe, mainnet = risky)
+2. **Security:** You protect all private keys and credentials
+3. **Funds:** You own any USDC/ETH used (real or testnet)
+4. **Results:** You accept all outcomes of predictions/transactions
+5. **Compliance:** You follow all local laws and regulations
+6. **Technical:** You understand smart contracts and blockchain risks
+
+### Explicit Mainnet Warning
+
+**DO NOT DEPLOY TO MAINNET UNLESS YOU UNDERSTAND:**
+- Gas fees will cost real money (could be expensive)
+- Smart contracts are immutable (bugs can't be fixed)
+- Any USDC stakes are real money (no recovery)
+- Hacks or exploits = permanent loss
+- No insurance, no refunds, no support
+
+---
+
+**By using this code, you confirm you have read and understood this disclaimer.**
+
+---
+
+---
+
 ## 🎯 What This Does
 
 **Part 1: Whale Detection**
