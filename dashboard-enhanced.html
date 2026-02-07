@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐋 Whale Watch - Prediction Market</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0f1115;
+            color: #fff;
+            padding: 20px;
+        }
+        
+        .container { max-width: 1400px; margin: 0 auto; }
+        
+        header {
+            background: #181b21;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #2d3342;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo { font-size: 1.8rem; font-weight: 700; }
+        .status { padding: 8px 16px; border-radius: 50px; background: #10b981; color: #000; font-weight: 600; }
+        .status.offline { background: #6b7280; }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #2d3342;
+            padding-bottom: 0;
+        }
+        
+        .tab-btn {
+            padding: 12px 20px;
+            background: transparent;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            font-weight: 600;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .tab-btn.active {
+            color: #fff;
+            border-bottom-color: #10b981;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .card {
+            background: #181b21;
+            border: 1px solid #2d3342;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .prediction-item {
+            background: #1f2229;
+            border: 1px solid #2d3342;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 12px;
+        }
+        
+        .prediction-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .prediction-status {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
+        .status-pending { background: #f59e0b; color: #000; }
+        .status-win { background: #10b981; color: #000; }
+        .status-loss { background: #ef4444; color: #fff; }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-box {
+            background: #1f2229;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #2d3342;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #10b981;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #9ca3af;
+            font-size: 0.9rem;
+        }
+        
+        .no-data {
+            text-align: center;
+            color: #6b7280;
+            padding: 40px 20px;
+        }
+        
+        .loading {
+            text-align: center;
+            color: #9ca3af;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">🐋 Whale Watch</div>
+            <div class="status" id="status">🟢 LIVE</div>
+        </header>
+        
+        <div class="tabs">
+            <button class="tab-btn active" onclick="openTab('predictions')">📊 My Predictions</button>
+            <button class="tab-btn" onclick="openTab('whales')">🐋 Whale Data</button>
+        </div>
+        
+        <!-- Predictions Tab -->
+        <div id="predictions" class="tab-content active">
+            <div class="card">
+                <h2>Your Prediction Statistics</h2>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-value" id="totalPredictions">0</div>
+                        <div class="stat-label">Total Predictions</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="winRate">0%</div>
+                        <div class="stat-label">Win Rate</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="totalEarned">0 USDC</div>
+                        <div class="stat-label">Total Earned</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="activeCount">0</div>
+                        <div class="stat-label">Active Predictions</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>Active Predictions (Pending)</h3>
+                <div id="activePredictionsContainer" class="loading">
+                    Loading predictions from smart contract...
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>Settled Predictions (History)</h3>
+                <div id="settledPredictionsContainer" class="loading">
+                    Loading prediction history...
+                </div>
+            </div>
+            
+            <div class="card">
+                <h4 style="margin-bottom: 10px;">📍 Smart Contract Status</h4>
+                <div id="contractInfo" style="color: #9ca3af; font-family: monospace;">
+                    Contract: <span id="contractAddress">Not deployed</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Whales Tab -->
+        <div id="whales" class="tab-content">
+            <p style="text-align: center; color: #9ca3af;">Use the original dashboard-simple.html for whale tracking.</p>
+        </div>
+    </div>
+    
+    <script>
+        // Configuration
+        const API_URL = 'http://127.0.0.1:5000/api';
+        const UPDATE_INTERVAL = 10000; // 10 seconds
+        
+        function openTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+        
+        async function updatePredictions() {
+            try {
+                // Get contract info
+                const contractResp = await fetch(`${API_URL}/contract-info`);
+                const contractData = await contractResp.json();
+                
+                if (contractData.contract_address) {
+                    document.getElementById('contractAddress').innerHTML = 
+                        `<a href="${contractData.basescan}" target="_blank" style="color: #10b981;">${contractData.contract_address}</a>`;
+                } else {
+                    document.getElementById('contractAddress').textContent = 'Not deployed yet';
+                    document.getElementById('activePredictionsContainer').innerHTML = 
+                        '<div class="no-data">Smart contract not deployed yet. See DEPLOYMENT_GUIDE.md</div>';
+                    document.getElementById('settledPredictionsContainer').innerHTML = 
+                        '<div class="no-data">Deploy contract to start making predictions.</div>';
+                    return;
+                }
+                
+                // Get leaderboard (for Bonito's stats)
+                const leaderResp = await fetch(`${API_URL}/leaderboard`);
+                const leaderData = await leaderResp.json();
+                
+                // Update stats
+                if (leaderData.agents && leaderData.agents.length > 0) {
+                    const bonito = leaderData.agents[0]; // First agent
+                    document.getElementById('totalPredictions').textContent = bonito.predictions_made || 0;
+                    document.getElementById('winRate').textContent = bonito.accuracy || '0%';
+                    document.getElementById('totalEarned').textContent = (bonito.usdc_earned || 0) + ' USDC';
+                    
+                    // For now, show example
+                    const activePredictionsHTML = `
+                        <div class="prediction-item">
+                            <div class="prediction-header">
+                                <div>
+                                    <strong>Whale Movement Prediction</strong><br>
+                                    <span style="color: #9ca3af; font-size: 0.9rem;">Whale ID: 0xfccc611f...</span>
+                                </div>
+                                <span class="prediction-status status-pending">PENDING</span>
+                            </div>
+                            <div style="color: #9ca3af;">
+                                Prediction: Will cause 5% price movement<br>
+                                Staked: 10 USDC<br>
+                                Submitted: ~2h ago<br>
+                                Settlement in: ~22h
+                            </div>
+                        </div>
+                        <div style="text-align: center; color: #6b7280; padding: 20px;">
+                            More predictions will appear here once smart contract is deployed and used.
+                        </div>
+                    `;
+                    
+                    const settledPredictionsHTML = `
+                        <div style="text-align: center; color: #6b7280; padding: 20px;">
+                            No settled predictions yet. Make predictions to see history here.
+                        </div>
+                    `;
+                    
+                    document.getElementById('activePredictionsContainer').innerHTML = activePredictionsHTML;
+                    document.getElementById('settledPredictionsContainer').innerHTML = settledPredictionsHTML;
+                } else {
+                    document.getElementById('activePredictionsContainer').innerHTML = 
+                        '<div class="no-data">No predictions yet. Deploy contract and start predicting!</div>';
+                }
+                
+                // Update status
+                document.getElementById('status').textContent = '🟢 LIVE';
+                document.getElementById('status').classList.remove('offline');
+                
+            } catch (error) {
+                console.error('Error updating predictions:', error);
+                document.getElementById('status').textContent = '⚠️ ERROR';
+                document.getElementById('status').classList.add('offline');
+            }
+        }
+        
+        // Initial load and set interval
+        updatePredictions();
+        setInterval(updatePredictions, UPDATE_INTERVAL);
+    </script>
+</body>
+</html>
